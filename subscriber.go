@@ -8,6 +8,7 @@ import (
 	"github.com/streadway/amqp"
 	"reflect"
 	"sync"
+	"sync/atomic"
 )
 
 var (
@@ -20,16 +21,18 @@ var (
 type Handle func(delivery *amqp.Delivery)
 
 type subscriber struct {
-	conn *amqp.Connection
-	ctx  context.Context
-	uuid string
-	sync.Mutex
-	queues map[string]*SubscribeOption
+	conn       *amqp.Connection
+	ctx        context.Context
+	uuid       string
+	mu         sync.Mutex
+	queues     map[string]*SubscribeOption
+	cancelFunc context.CancelFunc
+	closed     int32
 }
 
 func (s *subscriber) Subscribe(queuename string, option *SubscribeOption) {
-	s.Lock()
-	defer s.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.queues[queuename] = option
 }
 
@@ -86,6 +89,12 @@ loop:
 	return nil
 }
 
+func (s *subscriber) Close() {
+	if atomic.CompareAndSwapInt32(&s.closed, 0, 1) {
+		s.cancelFunc()
+	}
+}
+
 type SubscribeOption struct {
 	AutoAck   bool
 	Exclusive bool
@@ -107,10 +116,12 @@ func NewSUbscribeDefaultOption(handle Handle) *SubscribeOption {
 }
 
 func NewSubscriber(conn *amqp.Connection, ctx context.Context) *subscriber {
+	ctx, cancel := context.WithCancel(ctx)
 	return &subscriber{
-		conn:   conn,
-		ctx:    ctx,
-		queues: make(map[string]*SubscribeOption),
-		uuid:   uuid.New().String(),
+		conn:       conn,
+		ctx:        ctx,
+		cancelFunc: cancel,
+		queues:     make(map[string]*SubscribeOption),
+		uuid:       uuid.New().String(),
 	}
 }
