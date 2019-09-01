@@ -2,12 +2,9 @@ package easy_amqp
 
 import (
 	"github.com/streadway/amqp"
-	"sync"
 )
 
 var (
-	qlock            = sync.Mutex{}
-	elock            = sync.Mutex{}
 	QueueDeclared    = make(map[string]*Queue)
 	ExchangeDeclared = make(map[string]*Exchange)
 )
@@ -24,9 +21,7 @@ func DeclareQueue(channel *amqp.Channel, queues ...*Queue) error {
 			queue.Alias = queue.Name
 		}
 		queue.Queue = &q
-		qlock.Lock()
 		QueueDeclared[queue.Alias] = queue
-		qlock.Unlock()
 		for _, bd := range queue.Binds {
 			exchanges = append(exchanges, bd.Exg)
 		}
@@ -58,9 +53,7 @@ func DeclareExchange(channel *amqp.Channel, exchanges ...*Exchange) error {
 		if exchange.Alias == "" {
 			exchange.Alias = exchange.Name
 		}
-		elock.Lock()
 		ExchangeDeclared[exchange.Alias] = exchange
-		elock.Unlock()
 		for _, bd := range exchange.Binds {
 			exgs = append(exgs, bd.Exg)
 		}
