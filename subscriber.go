@@ -7,7 +7,6 @@ import (
 	"github.com/speeder-allen/easy-amqp/pool"
 	"github.com/streadway/amqp"
 	"reflect"
-	"sync"
 	"sync/atomic"
 )
 
@@ -24,15 +23,12 @@ type subscriber struct {
 	conn       *amqp.Connection
 	ctx        context.Context
 	uuid       string
-	mu         sync.Mutex
 	queues     map[string]*SubscribeOption
 	cancelFunc context.CancelFunc
 	closed     int32
 }
 
 func (s *subscriber) Subscribe(queuename string, option *SubscribeOption) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
 	s.queues[queuename] = option
 }
 
