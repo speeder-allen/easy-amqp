@@ -117,7 +117,7 @@ func WithExchangeInternal(internal bool) ExchangeOption {
 	}
 }
 
-func NewQueue(name string, opts ...QueueOption) *Queue {
+func NewQueue(name string, opts ...QueueOption) Queue {
 	q := Queue{
 		Name:       name,
 		Alias:      name,
@@ -130,10 +130,10 @@ func NewQueue(name string, opts ...QueueOption) *Queue {
 	for _, o := range opts {
 		o(&q)
 	}
-	return &q
+	return q
 }
 
-func NewExchange(name string, kind ExchangeKind, opts ...ExchangeOption) *Exchange {
+func NewExchange(name string, kind ExchangeKind, opts ...ExchangeOption) Exchange {
 	e := Exchange{
 		Name:       name,
 		Kind:       kind,
@@ -147,5 +147,5 @@ func NewExchange(name string, kind ExchangeKind, opts ...ExchangeOption) *Exchan
 	for _, o := range opts {
 		o(&e)
 	}
-	return &e
+	return e
 }

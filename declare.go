@@ -5,13 +5,13 @@ import (
 )
 
 var (
-	QueueDeclared    = make(map[string]*Queue)
-	ExchangeDeclared = make(map[string]*Exchange)
+	QueueDeclared    = make(map[string]Queue)
+	ExchangeDeclared = make(map[string]Exchange)
 )
 
 // DeclareQueue is declare queues and bind exchange
-func DeclareQueue(channel *amqp.Channel, queues ...*Queue) error {
-	var exchanges []*Exchange
+func DeclareQueue(channel *amqp.Channel, queues ...Queue) error {
+	var exchanges []Exchange
 	for _, queue := range queues {
 		q, err := channel.QueueDeclare(queue.Name, queue.Durable, queue.AutoDelete, queue.Exclusive, queue.NoWait, queue.Args)
 		if err != nil {
@@ -43,8 +43,8 @@ func DeclareQueue(channel *amqp.Channel, queues ...*Queue) error {
 }
 
 // DeclareExchange is recursive declare exchanges and bind them
-func DeclareExchange(channel *amqp.Channel, exchanges ...*Exchange) error {
-	var exgs []*Exchange
+func DeclareExchange(channel *amqp.Channel, exchanges ...Exchange) error {
+	var exgs []Exchange
 	for _, exchange := range exchanges {
 		err := channel.ExchangeDeclare(exchange.Name, exchange.Kind.String(), exchange.Durable, exchange.AutoDelete, exchange.Internal, exchange.NoWait, exchange.Args)
 		if err != nil {

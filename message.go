@@ -2,6 +2,7 @@ package easy_amqp
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/streadway/amqp"
@@ -21,7 +22,7 @@ type message struct {
 }
 
 var (
-	ErrorInvalidContentType = "invalid content type"
+	ErrorInvalidContentType = errors.New("invalid content type")
 )
 
 func (m *message) Body() (bytes []byte, err error) {

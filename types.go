@@ -17,17 +17,17 @@ type Queue struct {
 	Args       amqp.Table
 	Queue      *amqp.Queue
 	sync.Mutex
-	Binds []*Bind
+	Binds []Bind
 }
 
-func (q *Queue) Bind(ex *Exchange, opts ...BindOption) {
+func (q *Queue) Bind(ex Exchange, opts ...BindOption) {
 	bind := Bind{Exg: ex, RouterKey: DefaultRouteKey, NoWait: DefaultBindNoWait, Args: amqp.Table{}}
 	for _, o := range opts {
 		o(&bind)
 	}
 	q.Lock()
 	defer q.Unlock()
-	q.Binds = append(q.Binds, &bind)
+	q.Binds = append(q.Binds, bind)
 }
 
 // Exchange is define amqp exchange
@@ -44,7 +44,7 @@ type Exchange struct {
 	Binds []*Bind
 }
 
-func (e *Exchange) Bind(ex *Exchange, opts ...BindOption) {
+func (e *Exchange) Bind(ex Exchange, opts ...BindOption) {
 	bind := Bind{Exg: ex, RouterKey: DefaultRouteKey, NoWait: DefaultBindNoWait, Args: amqp.Table{}}
 	for _, o := range opts {
 		o(&bind)
@@ -56,7 +56,7 @@ func (e *Exchange) Bind(ex *Exchange, opts ...BindOption) {
 
 // Bind is define exchange relation to queue or exchange relation to exchange
 type Bind struct {
-	Exg       *Exchange
+	Exg       Exchange
 	RouterKey string
 	NoWait    bool
 	Args      amqp.Table
